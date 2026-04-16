@@ -1,4 +1,4 @@
-package edu.dyds.movies
+package edu.dyds.movies.di
 
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -8,6 +8,12 @@ import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
+import edu.dyds.movies.data.MoviesRepositoryImpl
+import edu.dyds.movies.domain.repository.MoviesRepository
+import edu.dyds.movies.domain.usecase.GetPopularMoviesUseCase
+import edu.dyds.movies.domain.usecase.GetMovieDetailsUseCase
+import edu.dyds.movies.presentation.home.HomeViewModel
+import edu.dyds.movies.presentation.detail.DetailViewModel
 
 private const val API_KEY = "d18da1b5da16397619c688b0263cd281"
 
@@ -32,8 +38,21 @@ object MoviesDependencyInjector {
             }
         }
 
+    private val moviesRepository: MoviesRepository =
+        MoviesRepositoryImpl(tmdbHttpClient)
+
+    private val getPopularMoviesUseCase =
+        GetPopularMoviesUseCase(moviesRepository)
+
+    private val getMovieDetailsUseCase =
+        GetMovieDetailsUseCase(moviesRepository)
+
     @Composable
-    fun getMoviesViewModel(): MoviesViewModel {
-        return viewModel { MoviesViewModel(tmdbHttpClient) }
-    }
+    fun getHomeViewModel(): HomeViewModel =
+        viewModel { HomeViewModel(getPopularMoviesUseCase) }
+
+    @Composable
+    fun getDetailViewModel(): DetailViewModel =
+        viewModel { DetailViewModel(getMovieDetailsUseCase) }
 }
+

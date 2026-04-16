@@ -1,6 +1,6 @@
 @file:Suppress("FunctionName")
 
-package edu.dyds.movies
+package edu.dyds.movies.presentation.home
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -15,7 +15,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogWindow
 import androidx.compose.foundation.Image
 import androidx.compose.ui.res.painterResource
 import coil3.compose.AsyncImage
@@ -23,11 +22,14 @@ import dydsproject.composeapp.generated.resources.Res
 import dydsproject.composeapp.generated.resources.app_name
 import dydsproject.composeapp.generated.resources.error
 import org.jetbrains.compose.resources.stringResource
+import edu.dyds.movies.domain.entity.Movie
+import edu.dyds.movies.presentation.utils.LoadingIndicator
+import edu.dyds.movies.presentation.utils.NoResults
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    viewModel: MoviesViewModel,
+    viewModel: HomeViewModel,
     onGoodMovieClick: (Movie) -> Unit
 ) {
 
@@ -35,7 +37,7 @@ fun HomeScreen(
         viewModel.getAllMovies()
     }
 
-    val state by viewModel.moviesStateFlow.collectAsState(MoviesViewModel.MoviesUiState())
+    val state by viewModel.uiState.collectAsState()
 
     MaterialTheme {
         Surface {
@@ -64,7 +66,7 @@ fun HomeScreen(
 @Composable
 private fun MovieGrid(
     padding: PaddingValues,
-    movies: List<QualifiedMovie>,
+    movies: List<edu.dyds.movies.domain.entity.QualifiedMovie>,
     onMovieClick: (Movie) -> Unit
 ) {
     LazyVerticalGrid(
@@ -130,19 +132,26 @@ private fun BadMovieItem(movie: Movie) {
         )
     }
 
-    DialogWindow(
-        title = stringResource(Res.string.error),
-        resizable = false,
-        onCloseRequest = { dialogState = false },
-        visible = dialogState
-    ) {
-        Image(
-            painter = painterResource("images/too_bad.png"),
-            contentDescription = null,
-            contentScale = ContentScale.Fit,
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(1f)
+    if (dialogState) {
+        AlertDialog(
+            onDismissRequest = { dialogState = false },
+            confirmButton = {
+                Button(onClick = { dialogState = false }) {
+                    Text("OK")
+                }
+            },
+            title = { Text(stringResource(Res.string.error)) },
+            text = {
+                Image(
+                    painter = painterResource("images/too_bad.png"),
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(1f)
+                )
+            }
         )
     }
 }
+
