@@ -13,5 +13,3 @@ data class Movie(
     val voteAverage: Double
 )
 
-data class QualifiedMovie(val movie: Movie, val isGoodMovie: Boolean)
-
