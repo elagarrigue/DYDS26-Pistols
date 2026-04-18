@@ -34,14 +34,6 @@ private fun NavGraphBuilder.homeDestination(navController: NavHostController) {
     composable(HOME) {
         HomeScreen(
             viewModel = MoviesDependencyInjector.getHomeViewModel(),
-            /*TODO: Tecnicamente rompe DIP ya que llama a MoviesDependencyInjector.getHomeViewModel() directamente,
-                pero es compose asi que no estoy 100% seguro de si habria que inyectarlo con algo como:
-                @Composable
-                fun Navigation(
-                    homeViewModel: HomeViewModel = MoviesDependencyInjector.getHomeViewModel(),
-                    detailViewModel: DetailViewModel = MoviesDependencyInjector.getDetailViewModel()
-                )
-             */
             onGoodMovieClick = {
                 navController.navigate("$DETAIL/${it.id}")
             }

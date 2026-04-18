@@ -2,44 +2,23 @@ package edu.dyds.movies.di
 
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
-import io.ktor.client.*
-import io.ktor.client.plugins.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.http.*
-import io.ktor.serialization.kotlinx.json.*
-import kotlinx.serialization.json.Json
 import edu.dyds.movies.data.MoviesRepositoryImpl
+import edu.dyds.movies.data.external.RemoteDataSource
+import edu.dyds.movies.data.local.LocalDataSource
 import edu.dyds.movies.domain.repository.MoviesRepository
 import edu.dyds.movies.domain.usecase.GetPopularMoviesUseCase
 import edu.dyds.movies.domain.usecase.GetMovieDetailsUseCase
 import edu.dyds.movies.presentation.home.HomeViewModel
 import edu.dyds.movies.presentation.detail.DetailViewModel
 
-private const val API_KEY = "d18da1b5da16397619c688b0263cd281"
-
 object MoviesDependencyInjector {
 
-    private val tmdbHttpClient =
-        HttpClient {
-            install(ContentNegotiation) {
-                json(Json {
-                    ignoreUnknownKeys = true
-                })
-            }
-            install(DefaultRequest) {
-                url {
-                    protocol = URLProtocol.HTTPS
-                    host = "api.themoviedb.org"
-                    parameters.append("api_key", API_KEY)
-                }
-            }
-            install(HttpTimeout) {
-                requestTimeoutMillis = 5000
-            }
-        }
+    private val remoteDataSource = RemoteDataSource()
+
+    private val localDataSource = LocalDataSource()
 
     private val moviesRepository: MoviesRepository =
-        MoviesRepositoryImpl(tmdbHttpClient)
+        MoviesRepositoryImpl(localDataSource, remoteDataSource)
 
     private val getPopularMoviesUseCase =
         GetPopularMoviesUseCase(moviesRepository)
