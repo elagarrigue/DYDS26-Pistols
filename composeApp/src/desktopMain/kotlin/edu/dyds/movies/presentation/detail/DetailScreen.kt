@@ -26,6 +26,7 @@ import coil3.compose.AsyncImage
 import dydsproject.composeapp.generated.resources.*
 import org.jetbrains.compose.resources.stringResource
 import edu.dyds.movies.domain.entity.Movie
+import edu.dyds.movies.presentation.error.ErrorScreen
 import edu.dyds.movies.presentation.utils.LoadingIndicator
 import edu.dyds.movies.presentation.utils.NoResults
 
@@ -56,6 +57,7 @@ fun DetailScreen(viewModel: DetailViewModel, id: Int, onBack: () -> Unit) {
                 LoadingIndicator(enabled = state.isLoading, modifier = Modifier.padding(padding))
 
                 when {
+                    state.error != null -> ErrorScreen(state.error!!) {viewModel.getMovieDetail(id)}
                     state.movie != null -> MovieDetail(movie = state.movie!!, modifier = Modifier.padding(padding))
                     state.isLoading.not() -> NoResults { viewModel.getMovieDetail(id) }
                 }

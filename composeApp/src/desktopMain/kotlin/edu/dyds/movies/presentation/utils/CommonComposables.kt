@@ -11,6 +11,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import dydsproject.composeapp.generated.resources.Res
+import dydsproject.composeapp.generated.resources.retry
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun LoadingIndicator(enabled: Boolean, modifier: Modifier = Modifier) {
@@ -41,7 +44,7 @@ fun NoResults(
         )
         Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = onRetry) {
-            Text(text = "Retry")
+            Text(stringResource(Res.string.retry))
         }
     }
 }

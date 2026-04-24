@@ -23,6 +23,7 @@ import dydsproject.composeapp.generated.resources.app_name
 import dydsproject.composeapp.generated.resources.error
 import org.jetbrains.compose.resources.stringResource
 import edu.dyds.movies.domain.entity.Movie
+import edu.dyds.movies.presentation.error.ErrorScreen
 import edu.dyds.movies.presentation.utils.LoadingIndicator
 import edu.dyds.movies.presentation.utils.NoResults
 
@@ -55,6 +56,7 @@ fun HomeScreen(
                 LoadingIndicator(state.isLoading)
 
                 when {
+                    state.error != null -> ErrorScreen(state.error!!) {viewModel.getAllMovies()}
                     state.movies.isNotEmpty() -> MovieGrid(padding, state.movies, onGoodMovieClick)
                     state.isLoading.not() -> NoResults { viewModel.getAllMovies() }
                 }
