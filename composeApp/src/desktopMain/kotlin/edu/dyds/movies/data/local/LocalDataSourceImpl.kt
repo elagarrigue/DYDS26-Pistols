@@ -2,7 +2,7 @@ package edu.dyds.movies.data.local
 
 import edu.dyds.movies.domain.entity.Movie
 
-class Cache : LocalDataSource {
+class LocalDataSourceImpl : LocalDataSource {
     private val cacheMovies: MutableList<Movie> = mutableListOf()
 
     override fun isNotEmpty(): Boolean = cacheMovies.isNotEmpty()
