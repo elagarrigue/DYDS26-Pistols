@@ -7,7 +7,5 @@ interface LocalDataSource {
 
     fun getCachedPopularMovies(): List<Movie>
 
-    fun clear()
-
     fun addAll(elements: Collection<Movie>)
 }
