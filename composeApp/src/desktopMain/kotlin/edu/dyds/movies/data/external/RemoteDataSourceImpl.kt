@@ -12,7 +12,7 @@ import kotlinx.serialization.json.Json
 
 private const val API_KEY = "d18da1b5da16397619c688b0263cd281"
 
-class TMDB : RemoteDataSource {
+class RemoteDataSourceImpl : RemoteDataSource {
     private val tmdbHttpClient =
         HttpClient {
             install(ContentNegotiation) {
