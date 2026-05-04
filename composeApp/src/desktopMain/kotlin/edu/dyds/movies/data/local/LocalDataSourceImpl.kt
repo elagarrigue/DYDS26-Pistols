@@ -5,9 +5,7 @@ import edu.dyds.movies.domain.entity.Movie
 class LocalDataSourceImpl : LocalDataSource {
     private val cacheMovies: MutableList<Movie> = mutableListOf()
 
-    override fun isNotEmpty(): Boolean = cacheMovies.isNotEmpty()
+    override fun getPopularMovies(): List<Movie> = cacheMovies.toList()
 
-    override fun getCachedPopularMovies(): List<Movie> = cacheMovies.toList()
-
-    override fun addAll(elements: Collection<Movie>) { cacheMovies.addAll(elements) }
+    override fun savePopularMovies(movies: Collection<Movie>) { cacheMovies.addAll(movies) }
 }

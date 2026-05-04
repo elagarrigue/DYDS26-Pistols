@@ -8,19 +8,19 @@ import edu.dyds.movies.domain.repository.MoviesRepository
 
 class MoviesRepositoryImpl(private val localDataSource: LocalDataSource, private val remoteDataSource: RemoteDataSource) : MoviesRepository {
 
-    override suspend fun getPopularMovies(): List<Movie> =
-        if (localDataSource.isNotEmpty()) {
-            localDataSource.getCachedPopularMovies()
-        } else {
-            try {
-                val remoteResult = remoteDataSource.getPopularMovies()
-                val movies = remoteResult.results.map { it.toDomain() }
-                localDataSource.addAll(movies)
-                movies
-            } catch (e: Exception) {
-                emptyList()
-            }
+    override suspend fun getPopularMovies(): List<Movie> {
+        val cached = localDataSource.getPopularMovies()
+        if (cached.isNotEmpty()) return cached
+
+        return try {
+            val remoteResult = remoteDataSource.getPopularMovies()
+            val movies = remoteResult.results.map { it.toDomain() }
+            localDataSource.savePopularMovies(movies)
+            movies
+        } catch (e: Exception) {
+            emptyList()
         }
+    }
 
     override suspend fun getMovieDetail(id: Int): Movie? =
         try {
@@ -29,4 +29,3 @@ class MoviesRepositoryImpl(private val localDataSource: LocalDataSource, private
             null
         }
 }
-

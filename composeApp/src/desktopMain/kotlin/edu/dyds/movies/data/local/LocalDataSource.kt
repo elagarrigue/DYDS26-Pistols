@@ -3,9 +3,7 @@ package edu.dyds.movies.data.local
 import edu.dyds.movies.domain.entity.Movie
 
 interface LocalDataSource {
-    fun isNotEmpty(): Boolean
+    fun getPopularMovies(): List<Movie>
 
-    fun getCachedPopularMovies(): List<Movie>
-
-    fun addAll(elements: Collection<Movie>)
+    fun savePopularMovies(movies: Collection<Movie>)
 }
