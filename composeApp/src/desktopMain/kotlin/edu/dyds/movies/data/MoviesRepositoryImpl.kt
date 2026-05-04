@@ -9,8 +9,8 @@ import edu.dyds.movies.domain.repository.MoviesRepository
 class MoviesRepositoryImpl(private val localDataSource: LocalDataSource, private val remoteDataSource: RemoteDataSource) : MoviesRepository {
 
     override suspend fun getPopularMovies(): List<Movie> {
-        val cached = localDataSource.getPopularMovies()
-        if (cached.isNotEmpty()) return cached
+        val localMovies = localDataSource.getPopularMovies()
+        if (localMovies.isNotEmpty()) return localMovies
 
         return try {
             val remoteResult = remoteDataSource.getPopularMovies()
