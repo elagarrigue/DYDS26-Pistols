@@ -17,12 +17,24 @@ class DetailViewModel(
     fun getMovieDetail(id: Int) {
         viewModelScope.launch {
             _uiState.emit(DetailUiState(isLoading = true))
-            _uiState.emit(
-                DetailUiState(
-                    isLoading = false,
-                    movie = getMovieDetailsUseCase(id)
+
+            try {
+                val movie = getMovieDetailsUseCase(id)
+
+                _uiState.emit(
+                    DetailUiState(
+                        isLoading = false,
+                        movie = movie
+                    )
                 )
-            )
+            } catch (e: Exception) {
+                _uiState.emit(
+                    DetailUiState(
+                        isLoading = false,
+                        movie = null
+                    )
+                )
+            }
         }
     }
 }

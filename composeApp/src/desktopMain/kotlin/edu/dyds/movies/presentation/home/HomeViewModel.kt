@@ -16,13 +16,29 @@ class HomeViewModel(
 
     fun getAllMovies() {
         viewModelScope.launch {
+
             _uiState.emit(HomeUiState(isLoading = true))
-            _uiState.emit(
-                HomeUiState(
-                    isLoading = false,
-                    movies = getPopularMoviesUseCase()
+
+            try {
+
+                val movies = getPopularMoviesUseCase()
+
+                _uiState.emit(
+                    HomeUiState(
+                        isLoading = false,
+                        movies = movies
+                    )
                 )
-            )
+
+            } catch (e: Exception) {
+
+                _uiState.emit(
+                    HomeUiState(
+                        isLoading = false,
+                        movies = emptyList()
+                    )
+                )
+            }
         }
     }
 }
