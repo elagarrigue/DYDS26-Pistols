@@ -2,7 +2,7 @@ package edu.dyds.movies.presentation.home
 
 import edu.dyds.movies.domain.entity.Movie
 import edu.dyds.movies.domain.entity.QualifiedMovie
-import edu.dyds.movies.domain.usecase.GetPopularMoviesUseCase
+import edu.dyds.movies.fakes.GetPopularMoviesUseCaseFake
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
@@ -18,8 +18,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import kotlin.test.assertFailsWith
-import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModelTest {
@@ -95,32 +93,31 @@ class HomeViewModelTest {
         job.cancel()
     }
 
-//
-@Test
-fun `getAllMovies emits empty movies when use case throws`() = runTest {
-    // arrange
-    val useCase = GetPopularMoviesUseCaseFake()
-    useCase.shouldThrow = true
+    @Test
+    fun `getAllMovies emits empty movies when use case throws`() = runTest {
+        // arrange
+        val useCase = GetPopularMoviesUseCaseFake()
+        useCase.shouldThrow = true
 
-    val viewModel = HomeViewModel(useCase)
+        val viewModel = HomeViewModel(useCase)
 
-    val states = mutableListOf<HomeUiState>()
-    val job = launch {
-        viewModel.uiState.collect { states.add(it) }
+        val states = mutableListOf<HomeUiState>()
+        val job = launch {
+            viewModel.uiState.collect { states.add(it) }
+        }
+
+        yield()
+
+        // act
+        viewModel.getAllMovies()
+        advanceUntilIdle()
+
+        // assert
+        assertFalse(states.last().isLoading)
+        assertTrue(states.last().movies.isEmpty())
+
+        job.cancel()
     }
-
-    yield()
-
-    // act
-    viewModel.getAllMovies()
-    advanceUntilIdle()
-
-    // assert
-    assertFalse(states.last().isLoading)
-    assertTrue(states.last().movies.isEmpty())
-
-    job.cancel()
-}
 
     private fun movieOf(id: Int) = Movie(
         id = id,
@@ -134,16 +131,4 @@ fun `getAllMovies emits empty movies when use case throws`() = runTest {
         popularity = 5.0,
         voteAverage = 7.0
     )
-
-    private class GetPopularMoviesUseCaseFake : GetPopularMoviesUseCase {
-        var result: List<QualifiedMovie> = emptyList()
-        var shouldThrow = false
-        var delayMillis: Long = 0
-
-        override suspend fun invoke(): List<QualifiedMovie> {
-            if (delayMillis > 0) delay(delayMillis)
-            if (shouldThrow) throw RuntimeException("use case error")
-            return result
-        }
-    }
 }

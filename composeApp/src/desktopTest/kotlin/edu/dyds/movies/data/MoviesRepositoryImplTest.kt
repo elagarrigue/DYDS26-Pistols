@@ -1,10 +1,10 @@
 package edu.dyds.movies.data
 
-import edu.dyds.movies.data.external.RemoteDataSource
 import edu.dyds.movies.data.external.RemoteMovie
 import edu.dyds.movies.data.external.RemoteResult
-import edu.dyds.movies.data.local.LocalDataSource
 import edu.dyds.movies.domain.entity.Movie
+import edu.dyds.movies.fakes.LocalDataSourceFake
+import edu.dyds.movies.fakes.RemoteDataSourceFake
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -130,41 +130,5 @@ class MoviesRepositoryImplTest {
         popularity = 5.0,
         voteAverage = 7.0
     )
-
-    private class LocalDataSourceFake : LocalDataSource {
-        var cachedMovies: List<Movie> = emptyList()
-        var saveWasCalled = false
-
-        override fun getPopularMovies(): List<Movie> = cachedMovies
-
-        override fun savePopularMovies(movies: Collection<Movie>) {
-            saveWasCalled = true
-            cachedMovies = movies.toList()
-        }
-    }
-
-    private class RemoteDataSourceFake : RemoteDataSource {
-        var popularMoviesResult: RemoteResult = RemoteResult(
-            page = 1,
-            results = emptyList(),
-            totalPages = 1,
-            totalResults = 0
-        )
-        var movieDetailResult: RemoteMovie? = null
-        var shouldThrowOnPopular = false
-        var shouldThrowOnDetail = false
-        var getPopularMoviesWasCalled = false
-
-        override suspend fun getPopularMovies(): RemoteResult {
-            getPopularMoviesWasCalled = true
-            if (shouldThrowOnPopular) throw RuntimeException("network error")
-            return popularMoviesResult
-        }
-
-        override suspend fun getMovieDetails(id: Int): RemoteMovie {
-            if (shouldThrowOnDetail) throw RuntimeException("network error")
-            return movieDetailResult ?: throw RuntimeException("not found")
-        }
-    }
 }
 

@@ -3,6 +3,7 @@ package edu.dyds.movies.domain.usecase
 import edu.dyds.movies.domain.entity.Movie
 import edu.dyds.movies.domain.entity.QualifiedMovie
 import edu.dyds.movies.domain.repository.MoviesRepository
+import edu.dyds.movies.fakes.MoviesRepositoryFake
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -77,7 +78,7 @@ class GetPopularMoviesUseCaseImplTest {
         val repository = MoviesRepositoryFake()
         val first = movieOf(id = 1, voteAverage = 8.0)
         val second = movieOf(id = 2, voteAverage = 7.0)
-        repository.popularMovies = listOf(first, second)
+        repository.popularMovies = listOf(second, first)
         val useCase = GetPopularMoviesUseCaseImpl(repository)
 
         // act
@@ -99,14 +100,5 @@ class GetPopularMoviesUseCaseImplTest {
         popularity = 5.0,
         voteAverage = voteAverage
     )
-
-    private class MoviesRepositoryFake : MoviesRepository {
-        var popularMovies: List<Movie> = emptyList()
-        var movieDetail: Movie? = null
-
-        override suspend fun getPopularMovies(): List<Movie> = popularMovies
-
-        override suspend fun getMovieDetail(id: Int): Movie? = movieDetail
-    }
 }
 

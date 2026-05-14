@@ -1,7 +1,7 @@
 package edu.dyds.movies.presentation.detail
 
 import edu.dyds.movies.domain.entity.Movie
-import edu.dyds.movies.domain.usecase.GetMovieDetailsUseCase
+import edu.dyds.movies.fakes.GetMovieDetailsUseCaseFake
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
@@ -16,10 +16,8 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class DetailViewModelTest {
@@ -95,32 +93,31 @@ class DetailViewModelTest {
         job.cancel()
     }
 
-//
-@Test
-fun `getMovieDetail does not crash when use case throws`() = runTest {
-    // arrange
-    val useCase = GetMovieDetailsUseCaseFake()
-    useCase.shouldThrow = true
+    @Test
+    fun `getMovieDetail does not crash when use case throws`() = runTest {
+        // arrange
+        val useCase = GetMovieDetailsUseCaseFake()
+        useCase.shouldThrow = true
 
-    val viewModel = DetailViewModel(useCase)
+        val viewModel = DetailViewModel(useCase)
 
-    val states = mutableListOf<DetailUiState>()
-    val job = launch {
-        viewModel.uiState.collect { states.add(it) }
+        val states = mutableListOf<DetailUiState>()
+        val job = launch {
+            viewModel.uiState.collect { states.add(it) }
+        }
+
+        yield()
+
+        // act
+        viewModel.getMovieDetail(100)
+        advanceUntilIdle()
+
+        // assert
+        assertFalse(states.last().isLoading)
+        assertNull(states.last().movie)
+
+        job.cancel()
     }
-
-    yield()
-
-    // act
-    viewModel.getMovieDetail(100)
-    advanceUntilIdle()
-
-    // assert
-    assertFalse(states.last().isLoading)
-    assertNull(states.last().movie)
-
-    job.cancel()
-}
 
     private fun movieOf(id: Int) = Movie(
         id = id,
@@ -134,16 +131,4 @@ fun `getMovieDetail does not crash when use case throws`() = runTest {
         popularity = 5.0,
         voteAverage = 7.0
     )
-
-    private class GetMovieDetailsUseCaseFake : GetMovieDetailsUseCase {
-        var result: Movie? = null
-        var shouldThrow = false
-        var delayMillis: Long = 0
-
-        override suspend fun invoke(id: Int): Movie? {
-            if (delayMillis > 0) delay(delayMillis)
-            if (shouldThrow) throw RuntimeException("use case error")
-            return result
-        }
-    }
 }
