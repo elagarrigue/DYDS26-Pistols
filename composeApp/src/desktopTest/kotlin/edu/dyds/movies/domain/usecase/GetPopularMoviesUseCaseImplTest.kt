@@ -3,7 +3,8 @@ package edu.dyds.movies.domain.usecase
 import edu.dyds.movies.domain.entity.Movie
 import edu.dyds.movies.domain.entity.QualifiedMovie
 import edu.dyds.movies.domain.repository.MoviesRepository
-import edu.dyds.movies.fakes.MoviesRepositoryFake
+import io.mockk.coEvery
+import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -15,11 +16,11 @@ class GetPopularMoviesUseCaseImplTest {
     @Test
     fun `invoke returns movies sorted by vote average descending`() = runTest {
         // arrange
-        val repository = MoviesRepositoryFake()
+        val repository = mockk<MoviesRepository>()
         val low = movieOf(id = 1, voteAverage = 5.0)
         val high = movieOf(id = 2, voteAverage = 8.0)
         val mid = movieOf(id = 3, voteAverage = 7.0)
-        repository.popularMovies = listOf(low, high, mid)
+        coEvery { repository.getPopularMovies() } returns listOf(low, high, mid)
         val useCase = GetPopularMoviesUseCaseImpl(repository)
 
         // act
@@ -32,9 +33,8 @@ class GetPopularMoviesUseCaseImplTest {
     @Test
     fun `invoke marks movies with voteAverage greater or equal to 6 as good`() = runTest {
         // arrange
-        val repository = MoviesRepositoryFake()
-        val movie = movieOf(id = 1, voteAverage = 6.0)
-        repository.popularMovies = listOf(movie)
+        val repository = mockk<MoviesRepository>()
+        coEvery { repository.getPopularMovies() } returns listOf(movieOf(id = 1, voteAverage = 6.0))
         val useCase = GetPopularMoviesUseCaseImpl(repository)
 
         // act
@@ -47,9 +47,8 @@ class GetPopularMoviesUseCaseImplTest {
     @Test
     fun `invoke marks movies with voteAverage less than 6 as not good`() = runTest {
         // arrange
-        val repository = MoviesRepositoryFake()
-        val movie = movieOf(id = 1, voteAverage = 5.9)
-        repository.popularMovies = listOf(movie)
+        val repository = mockk<MoviesRepository>()
+        coEvery { repository.getPopularMovies() } returns listOf(movieOf(id = 1, voteAverage = 5.9))
         val useCase = GetPopularMoviesUseCaseImpl(repository)
 
         // act
@@ -62,7 +61,8 @@ class GetPopularMoviesUseCaseImplTest {
     @Test
     fun `invoke returns empty list when repository returns empty`() = runTest {
         // arrange
-        val repository = MoviesRepositoryFake()
+        val repository = mockk<MoviesRepository>()
+        coEvery { repository.getPopularMovies() } returns emptyList()
         val useCase = GetPopularMoviesUseCaseImpl(repository)
 
         // act
@@ -75,10 +75,10 @@ class GetPopularMoviesUseCaseImplTest {
     @Test
     fun `invoke maps all movies to QualifiedMovie preserving movie data`() = runTest {
         // arrange
-        val repository = MoviesRepositoryFake()
+        val repository = mockk<MoviesRepository>()
         val first = movieOf(id = 1, voteAverage = 8.0)
         val second = movieOf(id = 2, voteAverage = 7.0)
-        repository.popularMovies = listOf(first, second)
+        coEvery { repository.getPopularMovies() } returns listOf(first, second)
         val useCase = GetPopularMoviesUseCaseImpl(repository)
 
         // act
@@ -101,4 +101,3 @@ class GetPopularMoviesUseCaseImplTest {
         voteAverage = voteAverage
     )
 }
-

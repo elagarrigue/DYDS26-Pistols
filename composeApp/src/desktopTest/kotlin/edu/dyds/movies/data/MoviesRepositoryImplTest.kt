@@ -1,10 +1,13 @@
 package edu.dyds.movies.data
 
+import edu.dyds.movies.data.external.RemoteDataSource
 import edu.dyds.movies.data.external.RemoteMovie
 import edu.dyds.movies.data.external.RemoteResult
 import edu.dyds.movies.domain.entity.Movie
 import edu.dyds.movies.fakes.LocalDataSourceFake
-import edu.dyds.movies.fakes.RemoteDataSourceFake
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -17,7 +20,7 @@ class MoviesRepositoryImplTest {
     fun `getPopularMovies returns local cache when it is not empty`() = runTest {
         // arrange
         val local = LocalDataSourceFake()
-        val remote = RemoteDataSourceFake()
+        val remote = mockk<RemoteDataSource>()
         val cached = listOf(movieOf(id = 1), movieOf(id = 2))
         local.cachedMovies = cached
         val repository = MoviesRepositoryImpl(local, remote)
@@ -27,15 +30,15 @@ class MoviesRepositoryImplTest {
 
         // assert
         assertEquals(cached, result)
-        assertTrue(!remote.getPopularMoviesWasCalled)
+        coVerify(exactly = 0) { remote.getPopularMovies() }
     }
 
     @Test
     fun `getPopularMovies fetches from remote and saves to local when cache is empty`() = runTest {
         // arrange
         val local = LocalDataSourceFake()
-        val remote = RemoteDataSourceFake()
-        remote.popularMoviesResult = RemoteResult(
+        val remote = mockk<RemoteDataSource>()
+        coEvery { remote.getPopularMovies() } returns RemoteResult(
             page = 1,
             results = listOf(remoteMovieOf(id = 10), remoteMovieOf(id = 11)),
             totalPages = 1,
@@ -56,8 +59,8 @@ class MoviesRepositoryImplTest {
     fun `getPopularMovies returns empty list when remote throws and cache is empty`() = runTest {
         // arrange
         val local = LocalDataSourceFake()
-        val remote = RemoteDataSourceFake()
-        remote.shouldThrowOnPopular = true
+        val remote = mockk<RemoteDataSource>()
+        coEvery { remote.getPopularMovies() } throws RuntimeException("network error")
         val repository = MoviesRepositoryImpl(local, remote)
 
         // act
@@ -71,8 +74,8 @@ class MoviesRepositoryImplTest {
     fun `getMovieDetail returns mapped movie from remote`() = runTest {
         // arrange
         val local = LocalDataSourceFake()
-        val remote = RemoteDataSourceFake()
-        remote.movieDetailResult = remoteMovieOf(id = 42, posterPath = "/poster.jpg", backdropPath = "/backdrop.jpg")
+        val remote = mockk<RemoteDataSource>()
+        coEvery { remote.getMovieDetails(42) } returns remoteMovieOf(id = 42, posterPath = "/poster.jpg", backdropPath = "/backdrop.jpg")
         val repository = MoviesRepositoryImpl(local, remote)
 
         // act
@@ -90,8 +93,8 @@ class MoviesRepositoryImplTest {
     fun `getMovieDetail returns null when remote throws`() = runTest {
         // arrange
         val local = LocalDataSourceFake()
-        val remote = RemoteDataSourceFake()
-        remote.shouldThrowOnDetail = true
+        val remote = mockk<RemoteDataSource>()
+        coEvery { remote.getMovieDetails(any()) } throws RuntimeException("network error")
         val repository = MoviesRepositoryImpl(local, remote)
 
         // act
@@ -131,4 +134,3 @@ class MoviesRepositoryImplTest {
         voteAverage = 7.0
     )
 }
-
