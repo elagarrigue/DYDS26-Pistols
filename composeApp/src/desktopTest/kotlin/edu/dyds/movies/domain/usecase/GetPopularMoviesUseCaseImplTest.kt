@@ -78,7 +78,7 @@ class GetPopularMoviesUseCaseImplTest {
         val repository = MoviesRepositoryFake()
         val first = movieOf(id = 1, voteAverage = 8.0)
         val second = movieOf(id = 2, voteAverage = 7.0)
-        repository.popularMovies = listOf(second, first)
+        repository.popularMovies = listOf(first, second)
         val useCase = GetPopularMoviesUseCaseImpl(repository)
 
         // act
