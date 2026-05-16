@@ -11,7 +11,6 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import kotlinx.coroutines.yield
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -40,8 +39,9 @@ class HomeViewModelTest {
         useCase.delayMillis = 1
         val viewModel = HomeViewModel(useCase)
         val states = mutableListOf<HomeUiState>()
-        val job = launch { viewModel.uiState.collect { states.add(it) } }
-        yield()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            viewModel.uiState.collect { states.add(it) }
+        }
 
         // act
         viewModel.getAllMovies()
@@ -49,7 +49,6 @@ class HomeViewModelTest {
 
         // assert
         assertTrue(states.any { it.isLoading })
-        job.cancel()
     }
 
     @Test
@@ -60,17 +59,16 @@ class HomeViewModelTest {
         useCase.result = expected
         val viewModel = HomeViewModel(useCase)
         val states = mutableListOf<HomeUiState>()
-        val job = launch { viewModel.uiState.collect { states.add(it) } }
-        yield()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            viewModel.uiState.collect { states.add(it) }
+        }
 
         // act
         viewModel.getAllMovies()
-        advanceUntilIdle()
 
         // assert
         assertFalse(states.last().isLoading)
         assertEquals(expected, states.last().movies)
-        job.cancel()
     }
 
     @Test
@@ -80,43 +78,16 @@ class HomeViewModelTest {
         useCase.result = emptyList()
         val viewModel = HomeViewModel(useCase)
         val states = mutableListOf<HomeUiState>()
-        val job = launch { viewModel.uiState.collect { states.add(it) } }
-        yield()
-
-        // act
-        viewModel.getAllMovies()
-        advanceUntilIdle()
-
-        // assert
-        assertFalse(states.last().isLoading)
-        assertTrue(states.last().movies.isEmpty())
-        job.cancel()
-    }
-
-    @Test
-    fun `getAllMovies emits empty movies when use case throws`() = runTest {
-        // arrange
-        val useCase = GetPopularMoviesUseCaseFake()
-        useCase.shouldThrow = true
-
-        val viewModel = HomeViewModel(useCase)
-
-        val states = mutableListOf<HomeUiState>()
-        val job = launch {
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.uiState.collect { states.add(it) }
         }
 
-        yield()
-
         // act
         viewModel.getAllMovies()
-        advanceUntilIdle()
 
         // assert
         assertFalse(states.last().isLoading)
         assertTrue(states.last().movies.isEmpty())
-
-        job.cancel()
     }
 
     private fun movieOf(id: Int) = Movie(

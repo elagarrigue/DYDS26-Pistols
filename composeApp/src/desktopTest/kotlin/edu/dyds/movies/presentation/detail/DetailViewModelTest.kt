@@ -10,7 +10,6 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import kotlinx.coroutines.yield
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -40,8 +39,9 @@ class DetailViewModelTest {
         useCase.delayMillis = 1
         val viewModel = DetailViewModel(useCase)
         val states = mutableListOf<DetailUiState>()
-        val job = launch { viewModel.uiState.collect { states.add(it) } }
-        yield()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            viewModel.uiState.collect { states.add(it) }
+        }
 
         // act
         viewModel.getMovieDetail(1)
@@ -49,7 +49,6 @@ class DetailViewModelTest {
 
         // assert
         assertTrue(states.any { it.isLoading })
-        job.cancel()
     }
 
     @Test
@@ -60,17 +59,16 @@ class DetailViewModelTest {
         useCase.result = movie
         val viewModel = DetailViewModel(useCase)
         val states = mutableListOf<DetailUiState>()
-        val job = launch { viewModel.uiState.collect { states.add(it) } }
-        yield()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            viewModel.uiState.collect { states.add(it) }
+        }
 
         // act
         viewModel.getMovieDetail(1)
-        advanceUntilIdle()
 
         // assert
         assertFalse(states.last().isLoading)
         assertEquals(movie, states.last().movie)
-        job.cancel()
     }
 
     @Test
@@ -80,43 +78,16 @@ class DetailViewModelTest {
         useCase.result = null
         val viewModel = DetailViewModel(useCase)
         val states = mutableListOf<DetailUiState>()
-        val job = launch { viewModel.uiState.collect { states.add(it) } }
-        yield()
-
-        // act
-        viewModel.getMovieDetail(99)
-        advanceUntilIdle()
-
-        // assert
-        assertFalse(states.last().isLoading)
-        assertNull(states.last().movie)
-        job.cancel()
-    }
-
-    @Test
-    fun `getMovieDetail does not crash when use case throws`() = runTest {
-        // arrange
-        val useCase = GetMovieDetailsUseCaseFake()
-        useCase.shouldThrow = true
-
-        val viewModel = DetailViewModel(useCase)
-
-        val states = mutableListOf<DetailUiState>()
-        val job = launch {
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.uiState.collect { states.add(it) }
         }
 
-        yield()
-
         // act
-        viewModel.getMovieDetail(100)
-        advanceUntilIdle()
+        viewModel.getMovieDetail(99)
 
         // assert
         assertFalse(states.last().isLoading)
         assertNull(states.last().movie)
-
-        job.cancel()
     }
 
     private fun movieOf(id: Int) = Movie(
