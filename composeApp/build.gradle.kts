@@ -8,6 +8,7 @@ plugins {
 }
 
 kotlin {
+    jvmToolchain(21)
     jvm("desktop")
     
     sourceSets {
@@ -32,6 +33,11 @@ kotlin {
             implementation(libs.ktor.client.contentnegotiation)
             implementation(libs.androidx.navigation.compose)
             implementation(libs.androidx.lifecycle.viewmodel.compose)
+        }
+        val desktopTest by getting {
+            dependencies {
+                implementation(libs.mockk)
+            }
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
