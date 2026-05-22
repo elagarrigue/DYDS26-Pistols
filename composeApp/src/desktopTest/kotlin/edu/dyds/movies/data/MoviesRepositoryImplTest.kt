@@ -1,5 +1,6 @@
 package edu.dyds.movies.data
 
+import edu.dyds.movies.data.external.MovieExternalSource
 import edu.dyds.movies.data.external.MoviesExternalSource
 import edu.dyds.movies.data.fakes.LocalDataSourceFake
 import edu.dyds.movies.domain.entity.Movie
@@ -15,14 +16,16 @@ import kotlin.test.assertTrue
 
 class MoviesRepositoryImplTest {
     private lateinit var local: LocalDataSourceFake
-    private lateinit var remote: MoviesExternalSource
+    private lateinit var popularMoviesSource: MoviesExternalSource
+    private lateinit var movieDetailSource: MovieExternalSource
     private lateinit var repository: MoviesRepositoryImpl
 
     @BeforeTest
     fun setUp() {
         local = LocalDataSourceFake()
-        remote = mockk<MoviesExternalSource>()
-        repository = MoviesRepositoryImpl(local, remote)
+        popularMoviesSource = mockk<MoviesExternalSource>()
+        movieDetailSource = mockk<MovieExternalSource>()
+        repository = MoviesRepositoryImpl(local, popularMoviesSource, movieDetailSource)
     }
 
     @Test
@@ -36,14 +39,14 @@ class MoviesRepositoryImplTest {
 
         // assert
         assertEquals(cached, result)
-        coVerify(exactly = 0) { remote.getPopularMovies() }
+        coVerify(exactly = 0) { popularMoviesSource.getPopularMovies() }
     }
 
     @Test
     fun `getPopularMovies fetches from remote and saves to local when cache is empty`() = runTest {
         // arrange
         val movies = listOf(movieOf(id = 10), movieOf(id = 11))
-        coEvery { remote.getPopularMovies() } returns movies
+        coEvery { popularMoviesSource.getPopularMovies() } returns movies
 
         // act
         val result = repository.getPopularMovies()
@@ -57,7 +60,7 @@ class MoviesRepositoryImplTest {
     @Test
     fun `getPopularMovies returns empty list when remote throws and cache is empty`() = runTest {
         // arrange
-        coEvery { remote.getPopularMovies() } throws RuntimeException("network error")
+        coEvery { popularMoviesSource.getPopularMovies() } throws RuntimeException("network error")
 
         // act
         val result = repository.getPopularMovies()
@@ -70,7 +73,7 @@ class MoviesRepositoryImplTest {
     fun `getMovieDetail returns movie from external source`() = runTest {
         // arrange
         val movie = movieOf(id = 42)
-        coEvery { remote.getMovieByTitle(any()) } returns movie
+        coEvery { movieDetailSource.getMovieByTitle(any()) } returns movie
 
         // act
         val result = repository.getMovieDetail("Movie 42")
@@ -82,7 +85,7 @@ class MoviesRepositoryImplTest {
     @Test
     fun `getMovieDetail returns null when remote throws`() = runTest {
         // arrange
-        coEvery { remote.getMovieByTitle(any()) } throws RuntimeException("network error")
+        coEvery { movieDetailSource.getMovieByTitle(any()) } throws RuntimeException("network error")
 
         // act
         val result = repository.getMovieDetail("Movie 99")

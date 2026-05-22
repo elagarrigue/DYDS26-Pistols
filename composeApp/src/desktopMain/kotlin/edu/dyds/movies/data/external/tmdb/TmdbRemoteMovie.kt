@@ -1,4 +1,4 @@
-package edu.dyds.movies.data.external
+package edu.dyds.movies.data.external.tmdb
 
 import edu.dyds.movies.domain.entity.Movie
 import kotlinx.serialization.SerialName
@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 private const val TMDB_IMAGE_BASE_URL = "https://image.tmdb.org/t/p"
 
 @Serializable
-data class RemoteMovie(
+data class TmdbRemoteMovie(
     val id: Int,
     val title: String,
     val overview: String,
