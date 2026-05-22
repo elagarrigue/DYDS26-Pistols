@@ -1,7 +1,7 @@
 package edu.dyds.movies.presentation.detail
 
 import edu.dyds.movies.domain.entity.Movie
-import edu.dyds.movies.fakes.GetMovieDetailsUseCaseFake
+import edu.dyds.movies.domain.fakes.GetMovieDetailsUseCaseFake
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
@@ -21,10 +21,14 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalCoroutinesApi::class)
 class DetailViewModelTest {
     private val dispatcher = UnconfinedTestDispatcher()
+    private lateinit var useCase: GetMovieDetailsUseCaseFake
+    private lateinit var viewModel: DetailViewModel
 
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(dispatcher)
+        useCase = GetMovieDetailsUseCaseFake()
+        viewModel = DetailViewModel(useCase)
     }
 
     @AfterTest
@@ -33,18 +37,16 @@ class DetailViewModelTest {
     }
 
     @Test
-    fun `getMovieDetail emits loading state before fetching`() = runTest {
+    fun `given use case has delay, when getMovieDetail, then loading state is emitted`() = runTest {
         // arrange
-        val useCase = GetMovieDetailsUseCaseFake()
         useCase.delayMillis = 1
-        val viewModel = DetailViewModel(useCase)
         val states = mutableListOf<DetailUiState>()
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.uiState.collect { states.add(it) }
         }
 
         // act
-        viewModel.getMovieDetail(1)
+        viewModel.getMovieDetail("Movie 1")
         advanceUntilIdle()
 
         // assert
@@ -52,19 +54,17 @@ class DetailViewModelTest {
     }
 
     @Test
-    fun `getMovieDetail emits movie on success`() = runTest {
+    fun `given use case returns a movie, when getMovieDetail, then final state has that movie`() = runTest {
         // arrange
-        val useCase = GetMovieDetailsUseCaseFake()
         val movie = movieOf(id = 1)
         useCase.result = movie
-        val viewModel = DetailViewModel(useCase)
         val states = mutableListOf<DetailUiState>()
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.uiState.collect { states.add(it) }
         }
 
         // act
-        viewModel.getMovieDetail(1)
+        viewModel.getMovieDetail("Movie 1")
 
         // assert
         assertFalse(states.last().isLoading)
@@ -72,18 +72,16 @@ class DetailViewModelTest {
     }
 
     @Test
-    fun `getMovieDetail emits null movie when use case returns null`() = runTest {
+    fun `given use case returns null, when getMovieDetail, then final state has null movie`() = runTest {
         // arrange
-        val useCase = GetMovieDetailsUseCaseFake()
         useCase.result = null
-        val viewModel = DetailViewModel(useCase)
         val states = mutableListOf<DetailUiState>()
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.uiState.collect { states.add(it) }
         }
 
         // act
-        viewModel.getMovieDetail(99)
+        viewModel.getMovieDetail("Movie 99")
 
         // assert
         assertFalse(states.last().isLoading)

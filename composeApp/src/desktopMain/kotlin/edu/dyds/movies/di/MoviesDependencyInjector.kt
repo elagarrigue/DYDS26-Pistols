@@ -3,7 +3,7 @@ package edu.dyds.movies.di
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import edu.dyds.movies.data.MoviesRepositoryImpl
-import edu.dyds.movies.data.external.RemoteDataSourceImpl
+import edu.dyds.movies.data.external.MoviesExternalSourceImpl
 import edu.dyds.movies.data.local.LocalDataSourceImpl
 import edu.dyds.movies.domain.repository.MoviesRepository
 import edu.dyds.movies.domain.usecase.GetMovieDetailsUseCaseImpl
@@ -13,7 +13,7 @@ import edu.dyds.movies.presentation.detail.DetailViewModel
 
 object MoviesDependencyInjector {
 
-    private val remoteDataSource = RemoteDataSourceImpl()
+    private val remoteDataSource = MoviesExternalSourceImpl()
 
     private val localDataSource = LocalDataSourceImpl()
 
@@ -34,4 +34,3 @@ object MoviesDependencyInjector {
     fun getDetailViewModel(): DetailViewModel =
         viewModel { DetailViewModel(getMovieDetailsUseCase) }
 }
-

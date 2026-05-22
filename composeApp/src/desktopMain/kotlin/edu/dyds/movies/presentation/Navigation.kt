@@ -18,7 +18,7 @@ private const val HOME = "home"
 
 private const val DETAIL = "detail"
 
-private const val MOVIE_ID = "movieId"
+private const val MOVIE_TITLE = "movieTitle"
 
 @Composable
 fun Navigation() {
@@ -35,7 +35,7 @@ private fun NavGraphBuilder.homeDestination(navController: NavHostController) {
         HomeScreen(
             viewModel = MoviesDependencyInjector.getHomeViewModel(),
             onGoodMovieClick = {
-                navController.navigate("$DETAIL/${it.id}")
+                navController.navigate("$DETAIL/${it.title}")
             }
         )
     }
@@ -43,14 +43,13 @@ private fun NavGraphBuilder.homeDestination(navController: NavHostController) {
 
 private fun NavGraphBuilder.detailDestination(navController: NavHostController) {
     composable(
-        route = "$DETAIL/{$MOVIE_ID}",
-        arguments = listOf(navArgument(MOVIE_ID) { type = NavType.IntType })
+        route = "$DETAIL/{$MOVIE_TITLE}",
+        arguments = listOf(navArgument(MOVIE_TITLE) { type = NavType.StringType })
     ) { backstackEntry ->
-        val movieId = backstackEntry.arguments?.getInt(MOVIE_ID)
+        val movieTitle = backstackEntry.arguments?.getString(MOVIE_TITLE)
 
-        movieId?.let {
+        movieTitle?.let {
             DetailScreen(MoviesDependencyInjector.getDetailViewModel(), it, onBack = { navController.popBackStack() })
         }
     }
 }
-
