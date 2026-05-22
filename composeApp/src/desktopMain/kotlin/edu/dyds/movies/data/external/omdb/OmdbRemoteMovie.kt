@@ -17,7 +17,6 @@ data class OmdbRemoteMovie(
     val imdbRating: String = "N/A",
 ) {
     fun toDomainMovie(): Movie = Movie(
-        id = title.hashCode(),
         title = title,
         overview = plot,
         releaseDate = if (released.isNotEmpty() && released != "N/A") released else year,

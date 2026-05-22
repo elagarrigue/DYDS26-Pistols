@@ -13,7 +13,6 @@ class MovieExternalSourceBroker(
 
         return when {
             tmdbResult != null && omdbResult != null -> Movie(
-                id = tmdbResult.id,
                 title = tmdbResult.title,
                 overview = "TMDB: ${tmdbResult.overview}\n\nOMDB: ${omdbResult.overview}",
                 releaseDate = tmdbResult.releaseDate,

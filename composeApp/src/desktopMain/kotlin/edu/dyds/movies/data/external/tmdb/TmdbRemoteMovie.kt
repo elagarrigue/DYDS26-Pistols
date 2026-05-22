@@ -20,7 +20,6 @@ data class TmdbRemoteMovie(
     @SerialName("vote_average") val voteAverage: Double? = null,
 ) {
     fun toDomainMovie(): Movie = Movie(
-        id = id,
         title = title,
         overview = overview,
         releaseDate = releaseDate ?: "",

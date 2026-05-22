@@ -95,7 +95,6 @@ class MoviesRepositoryImplTest {
     }
 
     private fun movieOf(id: Int) = Movie(
-        id = id,
         title = "Movie $id",
         overview = "Overview $id",
         releaseDate = "2024-01-01",

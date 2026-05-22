@@ -34,7 +34,7 @@ class GetPopularMoviesUseCaseImplTest {
         val result = useCase()
 
         // assert
-        assertEquals(listOf(2, 3, 1), result.map { it.movie.id })
+        assertEquals(listOf("Movie 2", "Movie 3", "Movie 1"), result.map { it.movie.title })
     }
 
     @Test
@@ -88,7 +88,6 @@ class GetPopularMoviesUseCaseImplTest {
     }
 
     private fun movieOf(id: Int, voteAverage: Double) = Movie(
-        id = id,
         title = "Movie $id",
         overview = "Overview $id",
         releaseDate = "2024-01-01",

@@ -33,7 +33,7 @@ class MovieExternalSourceBrokerTest {
         val result = broker.getMovieByTitle("Movie 1")
 
         // assert
-        assertEquals(tmdbMovie.id, result.id)
+        assertEquals(tmdbMovie.title, result.title)
         assertTrue(result.overview.contains("TMDB: TMDB overview"))
         assertTrue(result.overview.contains("OMDB: OMDB overview"))
         assertEquals(5.0, result.popularity)
@@ -86,7 +86,6 @@ class MovieExternalSourceBrokerTest {
         popularity: Double = 5.0,
         voteAverage: Double = 7.0
     ) = Movie(
-        id = id,
         title = "Movie $id",
         overview = overview,
         releaseDate = "2024-01-01",
