@@ -1,9 +1,9 @@
-package edu.dyds.movies.fakes
+package edu.dyds.movies.data.fakes
 
 import edu.dyds.movies.data.local.LocalDataSource
 import edu.dyds.movies.domain.entity.Movie
 
-class LocalDataSourceFake: LocalDataSource {
+class LocalDataSourceFake : LocalDataSource {
     var cachedMovies: List<Movie> = emptyList()
     var saveWasCalled = false
 

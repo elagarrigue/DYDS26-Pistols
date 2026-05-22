@@ -1,17 +1,21 @@
 package edu.dyds.movies.data.local
 
 import edu.dyds.movies.domain.entity.Movie
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class LocalDataSourceImplTest {
+    private lateinit var dataSource: LocalDataSourceImpl
+
+    @BeforeTest
+    fun setUp() {
+        dataSource = LocalDataSourceImpl()
+    }
 
     @Test
     fun `getPopularMovies returns empty list when no movies saved`() {
-        // arrange
-        val dataSource = LocalDataSourceImpl()
-
         // act
         val result = dataSource.getPopularMovies()
 
@@ -22,7 +26,6 @@ class LocalDataSourceImplTest {
     @Test
     fun `savePopularMovies persists movies retrievable by getPopularMovies`() {
         // arrange
-        val dataSource = LocalDataSourceImpl()
         val movies = listOf(movieOf(id = 1), movieOf(id = 2))
 
         // act
@@ -35,7 +38,6 @@ class LocalDataSourceImplTest {
     @Test
     fun `savePopularMovies accumulates movies across multiple saves`() {
         // arrange
-        val dataSource = LocalDataSourceImpl()
         val first = listOf(movieOf(id = 1))
         val second = listOf(movieOf(id = 2), movieOf(id = 3))
 
@@ -50,7 +52,6 @@ class LocalDataSourceImplTest {
     @Test
     fun `getPopularMovies returns a copy does not expose mutable internal state`() {
         // arrange
-        val dataSource = LocalDataSourceImpl()
         dataSource.savePopularMovies(listOf(movieOf(id = 1)))
 
         // act
