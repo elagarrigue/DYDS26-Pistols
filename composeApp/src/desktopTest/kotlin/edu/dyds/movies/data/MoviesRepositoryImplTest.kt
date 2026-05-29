@@ -1,7 +1,7 @@
 package edu.dyds.movies.data
 
-import edu.dyds.movies.data.external.MovieExternalSource
-import edu.dyds.movies.data.external.MoviesExternalSource
+import edu.dyds.movies.data.external.MovieDetailExternalSource
+import edu.dyds.movies.data.external.PopularMoviesExternalSource
 import edu.dyds.movies.data.fakes.LocalDataSourceFake
 import edu.dyds.movies.domain.entity.Movie
 import io.mockk.coEvery
@@ -16,15 +16,15 @@ import kotlin.test.assertTrue
 
 class MoviesRepositoryImplTest {
     private lateinit var local: LocalDataSourceFake
-    private lateinit var popularMoviesSource: MoviesExternalSource
-    private lateinit var movieDetailSource: MovieExternalSource
+    private lateinit var popularMoviesSource: PopularMoviesExternalSource
+    private lateinit var movieDetailSource: MovieDetailExternalSource
     private lateinit var repository: MoviesRepositoryImpl
 
     @BeforeTest
     fun setUp() {
         local = LocalDataSourceFake()
-        popularMoviesSource = mockk<MoviesExternalSource>()
-        movieDetailSource = mockk<MovieExternalSource>()
+        popularMoviesSource = mockk<PopularMoviesExternalSource>()
+        movieDetailSource = mockk<MovieDetailExternalSource>()
         repository = MoviesRepositoryImpl(local, popularMoviesSource, movieDetailSource)
     }
 
@@ -83,9 +83,9 @@ class MoviesRepositoryImplTest {
     }
 
     @Test
-    fun `getMovieDetail returns null when remote throws`() = runTest {
+    fun `getMovieDetail returns null when source returns null`() = runTest {
         // arrange
-        coEvery { movieDetailSource.getMovieByTitle(any()) } throws RuntimeException("network error")
+        coEvery { movieDetailSource.getMovieByTitle(any()) } returns null
 
         // act
         val result = repository.getMovieDetail("Movie 99")

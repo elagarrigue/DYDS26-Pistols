@@ -6,7 +6,7 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
+import kotlin.test.assertNull
 
 class TMDBMoviesProxyTest {
     private lateinit var source: TMDBMoviesExternalSource
@@ -44,18 +44,19 @@ class TMDBMoviesProxyTest {
         val result = proxy.getMovieByTitle("Movie 1")
 
         // assert
-        assertEquals("Movie 1", result.title)
+        assertEquals("Movie 1", result?.title)
     }
 
     @Test
-    fun `given source throws, when getMovieByTitle, then propagates exception`() = runTest {
+    fun `given source throws NoSuchElementException, when getMovieByTitle, then returns null`() = runTest {
         // arrange
         coEvery { source.getMovieByTitle(any()) } throws NoSuchElementException()
 
-        // act & assert
-        assertFailsWith<NoSuchElementException> {
-            proxy.getMovieByTitle("Unknown")
-        }
+        // act
+        val result = proxy.getMovieByTitle("Unknown")
+
+        // assert
+        assertNull(result)
     }
 
     private fun remoteMovieOf(

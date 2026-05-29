@@ -3,11 +3,11 @@ package edu.dyds.movies.data.external
 import edu.dyds.movies.domain.entity.Movie
 
 class MovieExternalSourceBroker(
-    private val tmdbSource: MovieExternalSource,
-    private val omdbSource: MovieExternalSource
-) : MovieExternalSource {
+    private val tmdbSource: MovieDetailExternalSource,
+    private val omdbSource: MovieDetailExternalSource
+) : MovieDetailExternalSource {
 
-    override suspend fun getMovieByTitle(title: String): Movie {
+    override suspend fun getMovieByTitle(title: String): Movie? {
         val tmdbResult = try { tmdbSource.getMovieByTitle(title) } catch (e: Exception) { null }
         val omdbResult = try { omdbSource.getMovieByTitle(title) } catch (e: Exception) { null }
 
@@ -25,7 +25,7 @@ class MovieExternalSourceBroker(
             )
             tmdbResult != null -> tmdbResult.copy(overview = "TMDB: ${tmdbResult.overview}")
             omdbResult != null -> omdbResult.copy(overview = "OMDB: ${omdbResult.overview}")
-            else -> throw NoSuchElementException("Neither TMDB nor OMDB returned a result for title: $title")
+            else -> null
         }
     }
 }

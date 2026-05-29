@@ -1,15 +1,15 @@
 package edu.dyds.movies.data
 
-import edu.dyds.movies.data.external.MovieExternalSource
-import edu.dyds.movies.data.external.MoviesExternalSource
+import edu.dyds.movies.data.external.MovieDetailExternalSource
+import edu.dyds.movies.data.external.PopularMoviesExternalSource
 import edu.dyds.movies.data.local.LocalDataSource
 import edu.dyds.movies.domain.entity.Movie
 import edu.dyds.movies.domain.repository.MoviesRepository
 
 class MoviesRepositoryImpl(
     private val localDataSource: LocalDataSource,
-    private val popularMoviesSource: MoviesExternalSource,
-    private val movieDetailSource: MovieExternalSource
+    private val popularMoviesSource: PopularMoviesExternalSource,
+    private val movieDetailSource: MovieDetailExternalSource
 ) : MoviesRepository {
 
     override suspend fun getPopularMovies(): List<Movie> {
@@ -25,10 +25,5 @@ class MoviesRepositoryImpl(
         }
     }
 
-    override suspend fun getMovieDetail(title: String): Movie? =
-        try {
-            movieDetailSource.getMovieByTitle(title)
-        } catch (e: Exception) {
-            null
-        }
+    override suspend fun getMovieDetail(title: String): Movie? = movieDetailSource.getMovieByTitle(title)
 }

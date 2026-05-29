@@ -6,6 +6,7 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertFailsWith
 
 class OMDBMovieProxyTest {
@@ -28,19 +29,20 @@ class OMDBMovieProxyTest {
         val result = proxy.getMovieByTitle("Movie 1")
 
         // assert
-        assertEquals("Movie 1", result.title)
-        assertEquals("A plot", result.overview)
+        assertEquals("Movie 1", result?.title)
+        assertEquals("A plot", result?.overview)
     }
 
     @Test
-    fun `given source returns False response, when getMovieByTitle, then throws`() = runTest {
+    fun `given source returns False response, when getMovieByTitle, then returns null`() = runTest {
         // arrange
         coEvery { source.getMovieByTitle(any()) } returns OmdbRemoteMovie(response = "False")
 
-        // act & assert
-        assertFailsWith<IllegalStateException> {
-            proxy.getMovieByTitle("Unknown")
-        }
+        // act
+        val result = proxy.getMovieByTitle("Unknown")
+
+        // assert
+        assertNull(result)
     }
 
     @Test

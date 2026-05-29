@@ -1,23 +1,23 @@
 package edu.dyds.movies.data.external
 
-import edu.dyds.movies.data.fakes.MovieExternalSourceFake
+import edu.dyds.movies.data.fakes.MovieDetailExternalSourceFake
 import edu.dyds.movies.domain.entity.Movie
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class MovieExternalSourceBrokerTest {
-    private lateinit var tmdbSource: MovieExternalSourceFake
-    private lateinit var omdbSource: MovieExternalSourceFake
+    private lateinit var tmdbSource: MovieDetailExternalSourceFake
+    private lateinit var omdbSource: MovieDetailExternalSourceFake
     private lateinit var broker: MovieExternalSourceBroker
 
     @BeforeTest
     fun setUp() {
-        tmdbSource = MovieExternalSourceFake()
-        omdbSource = MovieExternalSourceFake()
+        tmdbSource = MovieDetailExternalSourceFake()
+        omdbSource = MovieDetailExternalSourceFake()
         broker = MovieExternalSourceBroker(tmdbSource, omdbSource)
     }
 
@@ -33,11 +33,11 @@ class MovieExternalSourceBrokerTest {
         val result = broker.getMovieByTitle("Movie 1")
 
         // assert
-        assertEquals(tmdbMovie.title, result.title)
-        assertTrue(result.overview.contains("TMDB: TMDB overview"))
-        assertTrue(result.overview.contains("OMDB: OMDB overview"))
-        assertEquals(5.0, result.popularity)
-        assertEquals(7.0, result.voteAverage)
+        assertEquals(tmdbMovie.title, result?.title)
+        assertTrue(result?.overview?.contains("TMDB: TMDB overview") == true)
+        assertTrue(result?.overview?.contains("OMDB: OMDB overview") == true)
+        assertEquals(5.0, result?.popularity)
+        assertEquals(7.0, result?.voteAverage)
     }
 
     @Test
@@ -69,15 +69,16 @@ class MovieExternalSourceBrokerTest {
     }
 
     @Test
-    fun `given neither source returns a movie, when getMovieByTitle, then throws`() = runTest {
+    fun `given neither source returns a movie, when getMovieByTitle, then returns null`() = runTest {
         // arrange
         tmdbSource.shouldThrow = true
         omdbSource.shouldThrow = true
 
-        // act & assert
-        assertFailsWith<NoSuchElementException> {
-            broker.getMovieByTitle("Unknown Movie")
-        }
+        // act
+        val result = broker.getMovieByTitle("Unknown Movie")
+
+        // assert
+        assertNull(result)
     }
 
     private fun movieOf(

@@ -1,15 +1,15 @@
 package edu.dyds.movies.data.external.omdb
 
-import edu.dyds.movies.data.external.MovieExternalSource
+import edu.dyds.movies.data.external.MovieDetailExternalSource
 import edu.dyds.movies.domain.entity.Movie
 
 internal class OMDBMovieProxy(
     private val source: OMDBMoviesExternalSource
-) : MovieExternalSource {
+) : MovieDetailExternalSource {
 
-    override suspend fun getMovieByTitle(title: String): Movie {
+    override suspend fun getMovieByTitle(title: String): Movie? {
         val remote = source.getMovieByTitle(title)
-        check(remote.response == "True") { "OMDB: movie not found for title: $title" }
+        if (remote.response != "True") return null
         return remote.toDomainMovie()
     }
 }
