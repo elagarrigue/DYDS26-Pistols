@@ -1,10 +1,10 @@
-package edu.dyds.movies.fakes
+package edu.dyds.movies.domain.fakes
 
 import edu.dyds.movies.domain.entity.QualifiedMovie
 import edu.dyds.movies.domain.usecase.GetPopularMoviesUseCase
 import kotlinx.coroutines.delay
 
-class GetPopularMoviesUseCaseFake: GetPopularMoviesUseCase {
+class GetPopularMoviesUseCaseFake : GetPopularMoviesUseCase {
     var result: List<QualifiedMovie> = emptyList()
     var shouldThrow = false
     var delayMillis: Long = 0

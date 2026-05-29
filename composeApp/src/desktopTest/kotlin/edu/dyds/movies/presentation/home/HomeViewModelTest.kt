@@ -2,7 +2,7 @@ package edu.dyds.movies.presentation.home
 
 import edu.dyds.movies.domain.entity.Movie
 import edu.dyds.movies.domain.entity.QualifiedMovie
-import edu.dyds.movies.fakes.GetPopularMoviesUseCaseFake
+import edu.dyds.movies.domain.fakes.GetPopularMoviesUseCaseFake
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
@@ -21,10 +21,14 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModelTest {
     private val dispatcher = UnconfinedTestDispatcher()
+    private lateinit var useCase: GetPopularMoviesUseCaseFake
+    private lateinit var viewModel: HomeViewModel
 
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(dispatcher)
+        useCase = GetPopularMoviesUseCaseFake()
+        viewModel = HomeViewModel(useCase)
     }
 
     @AfterTest
@@ -33,11 +37,9 @@ class HomeViewModelTest {
     }
 
     @Test
-    fun `getAllMovies emits loading state before fetching`() = runTest {
+    fun `given use case has delay, when getAllMovies, then loading state is emitted`() = runTest {
         // arrange
-        val useCase = GetPopularMoviesUseCaseFake()
         useCase.delayMillis = 1
-        val viewModel = HomeViewModel(useCase)
         val states = mutableListOf<HomeUiState>()
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.uiState.collect { states.add(it) }
@@ -52,12 +54,10 @@ class HomeViewModelTest {
     }
 
     @Test
-    fun `getAllMovies emits movies on success`() = runTest {
+    fun `given use case returns movies, when getAllMovies, then final state has those movies`() = runTest {
         // arrange
-        val useCase = GetPopularMoviesUseCaseFake()
         val expected = listOf(QualifiedMovie(movieOf(id = 1), isGoodMovie = true))
         useCase.result = expected
-        val viewModel = HomeViewModel(useCase)
         val states = mutableListOf<HomeUiState>()
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.uiState.collect { states.add(it) }
@@ -72,11 +72,9 @@ class HomeViewModelTest {
     }
 
     @Test
-    fun `getAllMovies emits empty movies when use case returns empty list`() = runTest {
+    fun `given use case returns empty list, when getAllMovies, then final state has no movies`() = runTest {
         // arrange
-        val useCase = GetPopularMoviesUseCaseFake()
         useCase.result = emptyList()
-        val viewModel = HomeViewModel(useCase)
         val states = mutableListOf<HomeUiState>()
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.uiState.collect { states.add(it) }
@@ -91,7 +89,6 @@ class HomeViewModelTest {
     }
 
     private fun movieOf(id: Int) = Movie(
-        id = id,
         title = "Movie $id",
         overview = "Overview $id",
         releaseDate = "2024-01-01",
